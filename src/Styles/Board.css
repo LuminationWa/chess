@@ -1,0 +1,6 @@
+.chess-board {
+    display: grid;
+    width: 60vh;
+    padding-bottom: 60vh;
+    background-color: red;
+}

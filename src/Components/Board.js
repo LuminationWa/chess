@@ -2,16 +2,16 @@ import { useEffect } from "react";
 
 const Board = () => {
     useEffect(() => {
-        addPieces(8, 8, ".chess-board");
+        addSquares(8, 8, ".chess-board");
     }, []);
 
-    const addPieces = (rows, columns, element) => {
+    const addSquares = (rows, columns, element) => {
         let chessBoard = document.querySelector(`${element}`);
         for (let i = 0; i < rows * columns; i++) {
-            let piece = document.createElement("div");
-            piece.classList.add("piece");
-            piece.id = giveSquare(i);
-            chessBoard.appendChild(piece);
+            let square = document.createElement("div");
+            square.classList.add("square");
+            square.id = giveSquare(i);
+            chessBoard.appendChild(square);
         }
     };
     const giveSquare = (iteration) => {

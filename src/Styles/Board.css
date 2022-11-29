@@ -1,6 +1,21 @@
 .chess-board {
     display: grid;
     width: 60vh;
-    padding-bottom: 60vh;
-    background-color: red;
+    height: 60vh;
+    border: 1px solid red;
+    grid-template-columns: repeat(8, 8vh);
+    grid-template-rows: repeat(8, 8vh);
+    transform: rotate(-90deg);
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+img {
+    transform: rotate(90deg);
+    height: 6vh;
+    position: absolute;
 }

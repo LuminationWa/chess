@@ -19,3 +19,7 @@ img {
     height: 6vh;
     position: absolute;
 }
+
+.active {
+    border: 5px solid green;
+}

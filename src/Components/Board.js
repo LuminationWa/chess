@@ -1,20 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useState from "react-usestateref";
 import pieceFactory from "../pieceFactory";
 
 const Board = () => {
-  const pieceArray = useState([]);
+  const [pieceArray, setPieceArray] = useState([]);
+  const [positionsArray, setPositionsArray, positionsRef] = useState([]);
 
   useEffect(() => {
     addSquares(8, 8, ".chess-board");
-    let test = createPieces();
-    console.log(test);
-    assignImage(test);
+    let pieceInfo = createPieces();
+    assignImage(pieceInfo);
   }, []);
 
-  //Adds the board squares to the grid element
+  useEffect(() => {
+    if (positionsArray.length === 2) {
+      let originalPosition = document.getElementById(`${positionsArray[0]}`);
+      let newPosition = document.getElementById(`${positionsArray[1]}`);
+      if (
+        originalPosition.children[0] !== undefined &&
+        newPosition.children[0] === undefined
+      )
+        newPosition.appendChild(originalPosition.children[0]);
+      originalPosition.classList.toggle("active");
+      setPositionsArray([]);
+    }
+  }, [positionsArray]);
+
+  //Adds squares to the grid element
   const addSquares = (rows, columns, element) => {
     let chessBoard = document.querySelector(`${element}`);
-    let count = 1; //Count changes the coloring pattern every 8 squares;
+    let count = 1; //Changes the coloring pattern every 8 squares;
     for (let i = 0; i < rows * columns; i++) {
       if (i % 8 === 0) count++;
       let square = document.createElement("div");
@@ -30,6 +45,19 @@ const Board = () => {
         i % 2 === 0
           ? (square.style.backgroundColor = "white")
           : (square.style.backgroundColor = "brown");
+      square.addEventListener("click", () => {
+        if (
+          positionsRef.current.length === 0 &&
+          square.children[0] !== undefined
+        ) {
+          //Will only change square color if there's a piece to move on the original square
+          square.classList.toggle("active");
+        }
+        if (square.children[0] !== undefined || positionsRef.current.length > 0)
+          //Necessary so there's no color confusion. Only pushes to the array if there's a
+          //piece on the square (meaning it's the first position) or this is the square to move to
+          setPositionsArray((prevArray) => [...prevArray, square.id]);
+      });
       chessBoard.appendChild(square);
     }
   };
@@ -44,7 +72,7 @@ const Board = () => {
   };
 
   const createPieces = () => {
-    let piecesArray = [
+    let tobePlaced = [
       "rook",
       "knight",
       "bishop",
@@ -64,7 +92,7 @@ const Board = () => {
       } else if (8 <= i) {
         tempArray.push(
           pieceFactory(
-            piecesArray[0 + i - 8],
+            tobePlaced[0 + i - 8],
             "white",
             String.fromCharCode(65 + i - 8) + 1
           )
@@ -80,7 +108,7 @@ const Board = () => {
       } else if (8 <= i) {
         tempArray.push(
           pieceFactory(
-            piecesArray[0 + i - 8],
+            tobePlaced[0 + i - 8],
             "black",
             String.fromCharCode(65 + i - 8) + 8
           )

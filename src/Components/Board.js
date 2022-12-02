@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { isCompositeComponent } from "react-dom/test-utils";
 import useState from "react-usestateref";
 import pieceFactory from "../pieceFactory";
 
@@ -6,25 +7,49 @@ const Board = () => {
   const [pieceArray, setPieceArray] = useState([]);
   const [positionsArray, setPositionsArray, positionsRef] = useState([]);
 
+  //Initial useEffect
   useEffect(() => {
     addSquares(8, 8, ".chess-board");
-    let pieceInfo = createPieces();
-    assignImage(pieceInfo);
+    setPieceArray(createPieces());
   }, []);
 
+  //Movement useEffect
   useEffect(() => {
     if (positionsArray.length === 2) {
       let originalPosition = document.getElementById(`${positionsArray[0]}`);
       let newPosition = document.getElementById(`${positionsArray[1]}`);
       if (
-        originalPosition.children[0] !== undefined &&
-        newPosition.children[0] === undefined
+        checkMovement(
+          pieceArray[originalPosition.children[0].id].piece,
+          pieceArray[originalPosition.children[0].id].color,
+          originalPosition,
+          newPosition
+        )
       )
-        newPosition.appendChild(originalPosition.children[0]);
+        if (
+          //If there's nothing in new square
+          originalPosition.children[0] !== undefined &&
+          newPosition.children[0] === undefined
+        )
+          newPosition.appendChild(originalPosition.children[0]);
+        else if (
+          //If piece is opposite color
+          originalPosition.children[0] !== undefined &&
+          pieceArray[originalPosition.children[0].id].color !==
+            pieceArray[newPosition.children[0].id].color
+        ) {
+          newPosition.removeChild(newPosition.firstElementChild);
+          newPosition.appendChild(originalPosition.children[0]);
+        }
       originalPosition.classList.toggle("active");
       setPositionsArray([]);
     }
   }, [positionsArray]);
+
+  useEffect(() => {
+    assignImage(pieceArray);
+    console.log(pieceArray);
+  }, [pieceArray]);
 
   //Adds squares to the grid element
   const addSquares = (rows, columns, element) => {
@@ -119,12 +144,102 @@ const Board = () => {
   };
 
   const assignImage = (array) => {
-    array.forEach((piece) => {
+    array.forEach((piece, index) => {
       let square = document.getElementById(`${piece.position}`);
       let img = document.createElement("img");
+      img.id = index;
       img.src = `/Images/${piece.color}-${piece.piece}.svg`;
       square.appendChild(img);
     });
+  };
+
+  const checkMovement = (piece, color, originalSquare, newSquare) => {
+    console.log(piece, color, originalSquare, newSquare);
+    let colorDirection;
+    let letterDiff;
+    let numberDiff;
+    switch (piece) {
+      case "pawn":
+        color === "white" ? (colorDirection = 1) : (colorDirection = -1);
+        //Moving to an empty square
+        if (
+          newSquare.children[0] === undefined &&
+          newSquare.id.charAt(0) === originalSquare.id.charAt(0) &&
+          newSquare.id.charAt(1) ==
+            parseInt(originalSquare.id.charAt(1)) + 1 * colorDirection
+        )
+          return true;
+        //Moving to an occupied square
+        else if (
+          newSquare.children[0] !== undefined &&
+          (newSquare.id.charCodeAt(0) === originalSquare.id.charCodeAt(0) + 1 ||
+            newSquare.id.charCodeAt(0) ===
+              originalSquare.id.charCodeAt(0) - 1) &&
+          newSquare.id.charAt(1) ==
+            parseInt(originalSquare.id.charAt(1)) + 1 * colorDirection
+        )
+          return true;
+        break;
+      case "knight":
+        //Knight always moves three squares and either the letter or the number should change by two and the other one by one
+        letterDiff = Math.abs(
+          parseInt(originalSquare.id.charCodeAt(0)) -
+            parseInt(newSquare.id.charCodeAt(0))
+        );
+        numberDiff = Math.abs(
+          parseInt(originalSquare.id.charAt(1)) -
+            parseInt(newSquare.id.charAt(1))
+        );
+        return (
+          (letterDiff === 1 && numberDiff === 2) ||
+          (letterDiff === 2 && numberDiff === 1)
+        );
+      case "king":
+        letterDiff = Math.abs(
+          parseInt(originalSquare.id.charCodeAt(0)) -
+            parseInt(newSquare.id.charCodeAt(0))
+        );
+        numberDiff = Math.abs(
+          parseInt(originalSquare.id.charAt(1)) -
+            parseInt(newSquare.id.charAt(1))
+        );
+        return letterDiff <= 1 && numberDiff <= 1;
+      case "rook":
+        let direction;
+        let diff;
+        if (originalSquare.id.charAt(0) === newSquare.id.charAt(0)) {
+          direction = "vertical";
+          diff =
+            parseInt(originalSquare.id.charAt(1)) -
+            parseInt(newSquare.id.charAt(1));
+        } else if (originalSquare.id.charAt(1) === newSquare.id.charAt(1)) {
+          direction = "horizontal";
+          diff =
+            parseInt(originalSquare.id.charCodeAt(0)) -
+            parseInt(newSquare.id.charCodeAt(0));
+        }
+        //Needs fixing, too tired to figure it out rn
+        for (let i = 0; i <= Math.abs(diff); i++) {
+          if (direction === "vertical") {
+            console.log(
+              originalSquare.id.charAt(0) +
+                (parseInt(originalSquare.id.charAt(1)) + i * Math.sign(diff))
+            );
+            let nextSquare = document.getElementById(
+              originalSquare.id.charAt(0) +
+                (parseInt(originalSquare.id.charAt(1)) + i * Math.sign(diff) + 1)
+            );
+            if (nextSquare.children[0] === undefined) continue;
+            else {
+              console.log("break");
+              break;
+            }
+          }
+        }
+        break;
+      default:
+        return false;
+    }
   };
 
   return <div className="chess-board"></div>;

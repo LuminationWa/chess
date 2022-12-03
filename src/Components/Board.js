@@ -1,7 +1,14 @@
 import { useEffect } from "react";
-import { isCompositeComponent } from "react-dom/test-utils";
 import useState from "react-usestateref";
-import pieceFactory from "../pieceFactory";
+import pieceFactory from "../Functions/pieceFactory";
+import {
+  pawn,
+  knight,
+  king,
+  rook,
+  bishop,
+  queen,
+} from "../Functions/pieceMovement";
 
 const Board = () => {
   const [pieceArray, setPieceArray] = useState([]);
@@ -154,89 +161,19 @@ const Board = () => {
   };
 
   const checkMovement = (piece, color, originalSquare, newSquare) => {
-    console.log(piece, color, originalSquare, newSquare);
-    let colorDirection;
-    let letterDiff;
-    let numberDiff;
     switch (piece) {
       case "pawn":
-        color === "white" ? (colorDirection = 1) : (colorDirection = -1);
-        //Moving to an empty square
-        if (
-          newSquare.children[0] === undefined &&
-          newSquare.id.charAt(0) === originalSquare.id.charAt(0) &&
-          newSquare.id.charAt(1) ==
-            parseInt(originalSquare.id.charAt(1)) + 1 * colorDirection
-        )
-          return true;
-        //Moving to an occupied square
-        else if (
-          newSquare.children[0] !== undefined &&
-          (newSquare.id.charCodeAt(0) === originalSquare.id.charCodeAt(0) + 1 ||
-            newSquare.id.charCodeAt(0) ===
-              originalSquare.id.charCodeAt(0) - 1) &&
-          newSquare.id.charAt(1) ==
-            parseInt(originalSquare.id.charAt(1)) + 1 * colorDirection
-        )
-          return true;
-        break;
+        return pawn(color, originalSquare, newSquare);
       case "knight":
-        //Knight always moves three squares and either the letter or the number should change by two and the other one by one
-        letterDiff = Math.abs(
-          parseInt(originalSquare.id.charCodeAt(0)) -
-            parseInt(newSquare.id.charCodeAt(0))
-        );
-        numberDiff = Math.abs(
-          parseInt(originalSquare.id.charAt(1)) -
-            parseInt(newSquare.id.charAt(1))
-        );
-        return (
-          (letterDiff === 1 && numberDiff === 2) ||
-          (letterDiff === 2 && numberDiff === 1)
-        );
+        return knight(originalSquare, newSquare);
       case "king":
-        letterDiff = Math.abs(
-          parseInt(originalSquare.id.charCodeAt(0)) -
-            parseInt(newSquare.id.charCodeAt(0))
-        );
-        numberDiff = Math.abs(
-          parseInt(originalSquare.id.charAt(1)) -
-            parseInt(newSquare.id.charAt(1))
-        );
-        return letterDiff <= 1 && numberDiff <= 1;
+        return king(originalSquare, newSquare);
       case "rook":
-        let direction;
-        let diff;
-        if (originalSquare.id.charAt(0) === newSquare.id.charAt(0)) {
-          direction = "vertical";
-          diff =
-            parseInt(originalSquare.id.charAt(1)) -
-            parseInt(newSquare.id.charAt(1));
-        } else if (originalSquare.id.charAt(1) === newSquare.id.charAt(1)) {
-          direction = "horizontal";
-          diff =
-            parseInt(originalSquare.id.charCodeAt(0)) -
-            parseInt(newSquare.id.charCodeAt(0));
-        }
-        //Needs fixing, too tired to figure it out rn
-        for (let i = 0; i <= Math.abs(diff); i++) {
-          if (direction === "vertical") {
-            console.log(
-              originalSquare.id.charAt(0) +
-                (parseInt(originalSquare.id.charAt(1)) + i * Math.sign(diff))
-            );
-            let nextSquare = document.getElementById(
-              originalSquare.id.charAt(0) +
-                (parseInt(originalSquare.id.charAt(1)) + i * Math.sign(diff) + 1)
-            );
-            if (nextSquare.children[0] === undefined) continue;
-            else {
-              console.log("break");
-              break;
-            }
-          }
-        }
-        break;
+        return rook(originalSquare, newSquare, pieceArray);
+      case "bishop":
+        return bishop(originalSquare, newSquare, pieceArray);
+      case "queen":
+        return queen(originalSquare, newSquare, pieceArray);
       default:
         return false;
     }

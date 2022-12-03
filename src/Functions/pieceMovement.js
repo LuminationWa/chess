@@ -202,7 +202,6 @@ const bishop = (originalSquare, newSquare, pieceArray) => {
 
 const queen = (originalSquare, newSquare, pieceArray) => {
   return (
-    king(originalSquare, newSquare) ||
     rook(originalSquare, newSquare, pieceArray) ||
     bishop(originalSquare, newSquare, pieceArray)
   );
